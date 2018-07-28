@@ -1,0 +1,72 @@
+# Template setup for 2-choice LBA 3 Confidence choices,
+# except different pdf.
+# Two thresholds, b (upper) and d (lower). 
+#   External parameters types: A, B, D1, D2, t0, mean_v, sd_v, st0 = 0 (optional)
+#   Internal parameters types: A, b, d1, d2, t0, mean_v, sd_v, st0 = 0 (optional)
+
+# User edited functions for the DMC (Dynamic Models of Choice)
+#    Source in all applications
+
+# source("rtdists_extras.R")
+
+
+# This function transfroms parameters to a form suitbale for the model 
+#   being used. Called inside of get.par.mat. 
+# "par.df" is a data frame of parameters types , some of which may need to be 
+#   transformed, or new columns created, so that the full set of internal 
+#   parameter types, specified in "type.par.names", required by the type of 
+#   evidence accumulation model being used ("norm" etc.) is present.
+transform.dmc <- function(par.df) 
+{
+  # User supplied tranforms go here
+  par.df$d1 <- par.df$D1+par.df$A1
+  par.df$d2 <- par.df$d1+par.df$D2+par.df$A2
+  par.df$b <- par.df$d2+par.df$B+par.df$A ##Threshold noise for top threshold?
+  
+  
+  par.df[,c("A","A1","A2","b","d1","d2", "p_flc", "t0","mean_v","sd_v","st0")]
+}
+
+random.dmc <- function(n,p.df,model)
+{
+  rlba.3C_A(n,A=p.df$A,A1=p.df$A1,A2=p.df$A2, d1=p.df$d1,d2=p.df$d2,b=p.df$b,t0=p.df$t0[1], 
+          p_flc=p.df$p_flc,mean_v=p.df$mean_v,sd_v=p.df$sd_v,st0=p.df$st0[1],
+          posdrift = attr(model,"posdrift"))
+}
+
+
+likelihood.dmc <- function(p.vector,data,ok.types=c("norm3C"),min.like=1e-10) 
+  # Returns vector of likelihoods for each RT in data (in same order)
+  # !!! TO DO: types other than norm
+{
+  
+  #   # COMMENT OUT this check for speed after debugging
+  #   if ( !all(attr(model,"type") %in% ok.types) )
+  #     stop("Distribution function type not supported by likelihood.dmc")
+  
+  likelihood <- numeric(dim(data)[1])
+  for ( i in row.names(attr(data,"model")) ) if ( !attr(data,"cell.empty")[i] )
+  {
+    p.df <- p.df.dmc(p.vector,i,attributes(data)$model,n1order=TRUE)
+    likelihood[ attr(data,"cell.index")[[i]] ] <-
+      switch(attr(attributes(data)$model,"type"),
+             norm3C=n1PDF.3C_A(t=data$RT[attr(data,"cell.index")[[i]]],
+                             r2=data$R2[attr(data,"cell.index")[[i]]],
+                             A=p.df$A,
+                             A1=p.df$A1,
+                             A2=p.df$A2,
+                             b=p.df$b,
+                             d1=p.df$d1,
+                             d2=p.df$d2,
+                             p_flc=p.df$p_flc,
+                             t0=p.df$t0[1], 
+                             mean_v=p.df$mean_v,
+                             sd_v=p.df$sd_v,
+                             st0=p.df$st0[1],
+                             posdrift = attr(attr(data,"model"),"posdrift"))
+      )
+  }
+  pmax(likelihood,min.like)
+}
+
+

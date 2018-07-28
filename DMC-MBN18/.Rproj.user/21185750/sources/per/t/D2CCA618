@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1532621811487.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1696937810",
+    "id" : "D2CCA618",
+    "lastKnownWriteTime" : 1526628018,
+    "last_content_update" : 1526628018,
+    "path" : "~/Desktop/summer_school/rstudioDMC/DMC-MBN18/tutorial/dmc_6_5_SS_EXG3.R",
+    "project_path" : "tutorial/dmc_6_5_SS_EXG3.R",
+    "properties" : {
+        "cursorPosition" : "17,28",
+        "scrollLine" : "1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
